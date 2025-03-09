@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Route;
 
 use Illuminate\Http\Request;
 use App\Models\Contact;
@@ -55,6 +57,11 @@ class ContactController extends Controller
 
         return redirect()->route('contacts.index')->with('success', 'Contact added successfully');
     }
+    public function show($id)
+{
+    $contact = Contact::findOrFail($id);
+    return view('contacts.show', compact('contact'));
+}
 
     /**
      * Show the form for editing the specified contact.
@@ -90,4 +97,13 @@ class ContactController extends Controller
         $contact->delete();
         return redirect()->route('contacts.index')->with('success', 'Contact deleted successfully');
     }
+
+    public function exportPDF()
+{
+    $contacts = Contact::orderBy('name')->get();
+    $pdf = Pdf::loadView('contacts.pdf', compact('contacts'));
+
+    return $pdf->download('contacts_list.pdf');
+}
+
 }

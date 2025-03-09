@@ -4,8 +4,11 @@
 <div class="container">
     <h2>Contact List</h2>
 
-    <!-- Add Contact Button -->
-    <a href="{{ route('contacts.create') }}" class="btn btn-primary mb-3">Add Contact</a>
+    <!-- Add Contact & Download PDF Buttons -->
+    <div class="d-flex gap-2 mb-3">
+        <a href="{{ route('contacts.create') }}" class="btn btn-primary">Add Contact</a>
+        <a href="{{ route('contacts.export-pdf') }}" class="btn btn-outline-danger">Download PDF</a>
+    </div>
 
     <!-- Success Message -->
     @if (session('success'))
@@ -23,6 +26,7 @@
         </select>
 
         <button type="submit" class="btn btn-secondary">Search</button>
+        <a href="{{ route('contacts.index') }}" class="btn btn-outline-secondary">Reset</a>
     </form>
 
     <!-- Contacts Table -->
@@ -45,18 +49,48 @@
                 <td>{{ $contact->category }}</td>
                 <td>
                     <a href="{{ route('contacts.edit', $contact->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                    <form action="{{ route('contacts.destroy', $contact->id) }}" method="POST" style="display:inline;">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</button>
-                    </form>
+
+                    <!-- Delete Button (Triggers Modal) -->
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ $contact->id }}">
+                        Delete
+                    </button>
                 </td>
             </tr>
+
+            <!-- Delete Confirmation Modal -->
+            <div class="modal fade" id="deleteModal{{ $contact->id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Are you sure you want to delete <strong>{{ $contact->name }}</strong>?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{{ route('contacts.destroy', $contact->id) }}" method="POST">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             @empty
             <tr>
-                <td colspan="5" class="text-center">No contacts found.</td>
+                <td colspan="5" class="text-center">
+                    <p>No contacts found.</p>
+                    <a href="{{ route('contacts.create') }}" class="btn btn-sm btn-primary">Add a Contact</a>
+                </td>
             </tr>
             @endforelse
         </tbody>
     </table>
+
+    <!-- Pagination -->
+
 </div>
 @endsection
